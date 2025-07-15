@@ -407,7 +407,7 @@ const App: React.FC = () => {
         isOpen={isNewAdventureModalOpen}
         onClose={() => setNewAdventureModalOpen(false)}
         onStart={handleNewGame}
-        llmConfig={llmConfig}
+        selectedLLMConfig={llmConfig}
         onLLMConfigChange={setLlmConfig}
         imageProviders={availableImageProviders}
        defaultImageProvider={imageProvider}
