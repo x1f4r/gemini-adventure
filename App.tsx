@@ -165,7 +165,7 @@ const App: React.FC = () => {
       const { chat, scene } = await llm.startAdventure(config, startPrompt);
       console.log("llm.startAdventure returned:", { chat, scene });
       console.log("Calling image.generateSceneImage...");
-      const imageResult = await image.generateSceneImage(scene.description, scene.theme);
+      const imageResult = await image.generateSceneImage(scene.imagePrompt || scene.description, scene.theme);
       console.log("image.generateSceneImage returned:", imageResult);
       
       const newGameState: GameState = {
@@ -256,7 +256,11 @@ const App: React.FC = () => {
       );
       console.log("continueAdventure returned:", scene);
 
-      const image = await imageProvider.generateSceneImage(scene.description, scene.theme);
+      const image = await imageProvider.generateSceneImage(
+        scene.imagePrompt || scene.description,
+        scene.theme,
+        gameState.currentScene.imagePrompt || gameState.currentScene.description
+      );
       console.log("generateSceneImage returned:", image);
 
       const previousEntry: HistoryEntry = {
