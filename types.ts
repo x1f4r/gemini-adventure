@@ -29,13 +29,14 @@ export interface NPCChanges {
 }
 
 export interface Scene {
-  sceneDescription: string;
-  imagePrompt: string;
+  title?: string;
+  description: string;
+  imagePrompt?: string;
   choices: string[];
   theme: ThemeName;
-  inventoryChanges?: InventoryChanges;
-  worldStateChanges?: Record<string, string>;
-  npcChanges?: NPCChanges;
+  inventory?: string[];
+  worldState?: Record<string, string>;
+  npcs?: NPC[];
 }
 
 export interface HistoryEntry {
