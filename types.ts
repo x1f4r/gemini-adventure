@@ -1,5 +1,12 @@
 import type { LLMProviderName } from './services/llmProviders';
 
+export interface LLMConfig {
+  provider: LLMProviderName;
+  apiKey?: string;
+  endpoint?: string;
+  model?: string;
+}
+
 export type ThemeName = 'FANTASY' | 'CYBERPUNK' | 'SCI_FI' | 'HORROR' | 'NOIR' | 'STEAMPUNK' | 'SOLARPUNK' | 'POST_APOCALYPTIC' | 'WESTERN' | 'PIRATE';
 
 export interface InventoryChanges {

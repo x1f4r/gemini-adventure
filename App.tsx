@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import type { GameState, Scene, HistoryEntry, ThemeName, SaveData, NPC, ImageProvider } from './types';
-import { llmProviders, type LLMProvider, type LLMProviderName } from './services/llmProviders';
+import type { GameState, Scene, HistoryEntry, ThemeName, SaveData, NPC, ImageProvider, LLMConfig } from './types';
+import { getLLMProvider, type LLMProviderName } from './services/llmProviders';
 import { ImagenProvider, createComfyUIImageProvider } from './services/imageProviders';
 import { getSavedGames, saveGame, deleteGame, loadGame } from './services/saveGameService';
 
@@ -62,10 +62,14 @@ const App: React.FC = () => {
   const [customActionInput, setCustomActionInput] = useState('');
   const [tokenCount, setTokenCount] = useState(0);
   
-  const [llmProviderName, setLLMProviderName] = useState<LLMProviderName>('Gemini');
+  const [llmConfig, setLlmConfig] = useState<LLMConfig>({
+    provider: 'Gemini',
+    apiKey: import.meta.env.VITE_GEMINI_API_KEY,
+    model: 'gemini-2.5-pro',
+  });
   const [imageProvider, setImageProvider] = useState<ImageProvider>(availableImageProviders[0]);
 
-  const llmProvider = llmProviders[llmProviderName];
+  const llmProvider = getLLMProvider(llmConfig);
 
   useEffect(() => {
     const fetchSaves = async () => {
@@ -98,6 +102,7 @@ const App: React.FC = () => {
       const currentChat = gameState.chat;
       if (!currentChat) return;
       const count = await llmProvider.countTokensForRequest(
+        llmConfig,
         currentChat,
         customActionInput,
         gameState.inventory,
@@ -125,7 +130,7 @@ const App: React.FC = () => {
             npcs: state.npcs,
             currentScene: state.currentScene,
             currentImage: state.currentImage,
-            llmProvider: llmProvider.name,
+            llmConfig: llmConfig,
         };
         await saveGame(saveData);
         const games = await getSavedGames();
@@ -133,17 +138,18 @@ const App: React.FC = () => {
     } catch (error) {
         console.error("Failed to save game:", error);
     }
-  }, [llmProvider]);
+  }, [llmProvider, llmConfig]);
 
-  const handleNewGame = useCallback(async (startPrompt: string, llm: LLMProvider, image: ImageProvider) => {
+  const handleNewGame = useCallback(async (startPrompt: string, config: LLMConfig, image: ImageProvider) => {
     setNewAdventureModalOpen(false);
-    setLLMProviderName(llm.name);
+    setLlmConfig(config);
     setImageProvider(image);
+    const llm = getLLMProvider(config);
     setGameState((prev: GameState) => ({ ...initialGameState, isLoading: true, status: 'playing' }));
-    console.log("handleNewGame called with:", { startPrompt, llmName: llm.name, imageName: image.name });
+    console.log("handleNewGame called with:", { startPrompt, llmConfig: config, imageName: image.name });
     try {
       console.log("Calling llm.startAdventure...");
-      const { chat, scene } = await llm.startAdventure(startPrompt);
+      const { chat, scene } = await llm.startAdventure(config, startPrompt);
       console.log("llm.startAdventure returned:", { chat, scene });
       console.log("Calling image.generateSceneImage...");
       const imageResult = await image.generateSceneImage(scene.description, scene.theme);
@@ -182,12 +188,12 @@ const App: React.FC = () => {
     try {
         const saveData = await loadGame(id);
         if (saveData) {
-            const provider = llmProviders[saveData.llmProvider || 'Gemini'];
+            const provider = getLLMProvider(saveData.llmConfig);
             if (!provider.rehydrateAdventure) {
-                throw new Error(`The LLM provider ${saveData.llmProvider} does not support loading games.`);
+                throw new Error(`The LLM provider ${saveData.llmConfig.provider} does not support loading games.`);
             }
-            setLLMProviderName(provider.name);
-            const chat = await provider.rehydrateAdventure(saveData.chatHistory);
+            setLlmConfig(saveData.llmConfig);
+            const chat = await provider.rehydrateAdventure(saveData.llmConfig, saveData.chatHistory);
             setGameState({
                 id: saveData.id,
                 status: 'playing',
@@ -227,6 +233,7 @@ const App: React.FC = () => {
     setGameState((prev: GameState) => ({ ...prev, isLoading: true }));
     try {
       const scene = await llmProvider.continueAdventure(
+        llmConfig,
         gameState.chat,
         action,
         gameState.inventory,
@@ -269,7 +276,7 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (gameState.status) {
         case 'menu':
-            return <StartMenu onNewGame={(provider) => { setLLMProviderName(provider); setNewAdventureModalOpen(true); }} onLoadGame={() => setLoadModalOpen(true)} />;
+            return <StartMenu onNewGame={() => setNewAdventureModalOpen(true)} onLoadGame={() => setLoadModalOpen(true)} />;
         case 'playing':
             return (
               <>
@@ -283,11 +290,11 @@ const App: React.FC = () => {
                             <label htmlFor="llm-provider-main" className="text-sm font-semibold text-[var(--color-text-muted)]">LLM:</label>
                             <select
                                 id="llm-provider-main"
-                                value={llmProvider.name}
-                                onChange={e => setLLMProviderName(e.target.value as LLMProviderName)}
+                                value={llmConfig.provider}
+                                onChange={e => setLlmConfig({ ...llmConfig, provider: e.target.value as LLMProviderName })}
                                 className="bg-[var(--color-surface)] border border-[var(--color-surface)] rounded-md p-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                             >
-                                {Object.keys(llmProviders).map(name => <option key={name} value={name}>{name}</option>)}
+                                {['Gemini','LM Studio','Ollama'].map(name => <option key={name} value={name}>{name}</option>)}
                             </select>
                         </div>
                         <div className="flex items-center gap-2">
