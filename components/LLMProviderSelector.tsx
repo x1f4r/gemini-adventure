@@ -82,32 +82,17 @@ const LLMProviderSelector: React.FC<LLMProviderSelectorProps> = ({
       </div>
 
       {selectedLLMConfig.provider === 'Gemini' && (
-        <>
-          <div>
-            <label htmlFor="gemini-api-key" className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">Gemini API Key</label>
-            <input
-              type="password"
-              id="gemini-api-key"
-              value={selectedLLMConfig.apiKey || ''}
-              onChange={handleApiKeyChange}
-              className="bg-[var(--color-surface)] border-2 border-[var(--color-primary)] text-[var(--color-text)] text-base font-semibold rounded-lg shadow-md focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] block w-full pl-4 pr-10 py-3 transition-colors duration-300"
-              placeholder="Enter your Gemini API Key"
-            />
-          </div>
-          <div>
-            <label htmlFor="gemini-model-select" className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">Model</label>
-            <select
-              id="gemini-model-select"
-              value={selectedLLMConfig.model || ''}
-              onChange={handleModelChange}
-              className="appearance-none bg-[var(--color-surface)] border-2 border-[var(--color-primary)] text-[var(--color-text)] text-base font-semibold rounded-lg shadow-md focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] block w-full pl-4 pr-10 py-3 transition-colors duration-300"
-            >
-              {availableModels.map(model => (
-                <option key={model} value={model}>{model}</option>
-              ))}
-            </select>
-          </div>
-        </>
+        <div>
+          <label htmlFor="gemini-api-key" className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">Gemini API Key</label>
+          <input
+            type="password"
+            id="gemini-api-key"
+            value={selectedLLMConfig.apiKey || ''}
+            onChange={handleApiKeyChange}
+            className="bg-[var(--color-surface)] border-2 border-[var(--color-primary)] text-[var(--color-text)] text-base font-semibold rounded-lg shadow-md focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] block w-full pl-4 pr-10 py-3 transition-colors duration-300"
+            placeholder="Enter your Gemini API Key"
+          />
+        </div>
       )}
 
       {(selectedLLMConfig.provider === 'LM Studio' || selectedLLMConfig.provider === 'Ollama') && (
