@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gemini Adventure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* For a more immersive feel, use a custom font */
+      @import url('https://fonts.googleapis.com/css2?family=Almendra+SC:wght@400&family=Architects+Daughter&family=Cinzel:wght@400;700&family=Inter:wght@400;500;600&family=Pirata+One&family=Playfair+Display:wght@400;700&family=Rajdhani:wght@400;700&family=Rye&family=Special+Elite&display=swap');
+      body {
+        font-family: var(--font-body, 'Inter', sans-serif);
+        /* The background is now set by a CSS variable for dynamic theming */
+        background-color: var(--color-background-start, #111827); 
+        color: var(--color-text, #E5E7EB);
+        transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+      }
+    </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "@google/genai": "https://esm.sh/@google/genai@0.14.0",
+        "@google/genai/server": "https://esm.sh/@google/genai@0.14.0/server"
+      }
+    }
+  </script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
