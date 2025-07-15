@@ -85,17 +85,15 @@ const responseSchema = {
 
 function createGeminiChat(config: LLMProviderConfig, history?: History[]): Chat {
     const ai = new GoogleGenAI({ apiKey: config.apiKey || '' });
-    return ai.getGenerativeModel({
+    return ai.chats.create({
         model: config.model || 'gemini-2.5-flash',
-        systemInstruction: {
-            role: 'system',
-            parts: [{ text: systemInstruction }],
-        },
-        generationConfig: {
+        history,
+        config: {
+            systemInstruction: { role: 'system', parts: [{ text: systemInstruction }] },
             responseMimeType: 'application/json',
             responseSchema: responseSchema,
-        }
-    }).startChat({ history });
+        },
+    });
 }
 
 
@@ -105,7 +103,7 @@ const GeminiLLMProvider: LLMProvider = {
     if (!config.apiKey) throw new Error("Gemini API key not found.");
     console.log("[Gemini] Starting adventure with prompt:", startPrompt);
     const chat = createGeminiChat(config);
-    const response = await chat.sendMessage(startPrompt);
+    const response = await chat.sendMessage({ message: startPrompt });
     console.log("[Gemini] Raw response:", response.response.text());
     try {
       const scene: Scene = parseScene(response.response.text());
@@ -124,7 +122,7 @@ Known NPCs: ${JSON.stringify(npcs)}
 Player Action: "${choice}"
 `;
     console.log("[Gemini] continueAdventure context:", context);
-    const response = await chat.sendMessage(context);
+    const response = await chat.sendMessage({ message: context });
     console.log("[Gemini] Raw response:", response.response.text());
     try {
       const scene: Scene = parseScene(response.response.text());
@@ -142,7 +140,6 @@ Player Action: "${choice}"
     try {
         if (!config.apiKey) return 0;
         const ai = new GoogleGenAI({ apiKey: config.apiKey });
-        const model = ai.getGenerativeModel({ model: config.model || 'gemini-2.5-flash' });
         const history = await chat.getHistory();
         const context = `
 Current Inventory: [${inventory.join(', ')}]
@@ -151,7 +148,10 @@ Known NPCs: ${JSON.stringify(npcs)}
 
 Player Action: "${action}"
 `;
-        const { totalTokens } = await model.countTokens([...history, { role: 'user', parts: [{ text: context }] }]);
+        const { totalTokens } = await ai.models.countTokens({
+            model: config.model || 'gemini-2.5-flash',
+            contents: [...history, { role: 'user', parts: [{ text: context }] }],
+        });
         return totalTokens;
     } catch {
       return 0;
