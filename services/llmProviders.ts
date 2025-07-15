@@ -37,6 +37,7 @@ You will generate a JSON object representing the current scene. This object must
 - "theme": A single keyword suggesting a visual theme for the scene (e.g., "DARK_FOREST", "CYBERPUNK_CITY", "ANCIENT_RUINS").
 
 You must also manage the game's state:
+- "inventory": An array listing every item the player is currently carrying.
 - "worldState": An object containing key-value pairs that track the state of the world. This can include things like "door_unlocked": "true", "time_of_day": "night", etc. You can add, remove, or modify these as the story progresses.
 - "npcs": An array of non-player characters currently in the scene or relevant to it. Each NPC should be an object with "name", "description", and "dialogue" properties.
 
@@ -49,7 +50,7 @@ Key rules:
 4.  Keep the "description" brief—no more than two short paragraphs totalling a few sentences.
 5.  Write the description from the second-person perspective, focusing on what the player sees.
 6.  The "choices" should be meaningful and lead to different outcomes.
-7.  Update "worldState" and "npcs" logically based on the player's actions.
+7.  Update "worldState", "inventory", and "npcs" logically based on the player's actions.
 8.  If the player's action is nonsensical or impossible, create a response that reflects that in a creative way.
 9.  The "theme" should be chosen from a consistent set of themes to allow for visual theming of the game.
 `;
@@ -61,6 +62,10 @@ const responseSchema = {
     description: { type: "string" },
     imagePrompt: { type: "string" },
     choices: {
+      type: "array",
+      items: { type: "string" },
+    },
+    inventory: {
       type: "array",
       items: { type: "string" },
     },
@@ -87,7 +92,7 @@ const responseSchema = {
       },
     },
   },
-  required: ["title", "description", "imagePrompt", "choices", "theme", "worldState", "npcs"],
+  required: ["title", "description", "imagePrompt", "choices", "inventory", "theme", "worldState", "npcs"],
 };
 
 

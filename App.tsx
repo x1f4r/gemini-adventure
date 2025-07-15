@@ -168,11 +168,17 @@ const App: React.FC = () => {
       const imageResult = await image.generateSceneImage(scene.imagePrompt || scene.description, scene.theme);
       console.log("image.generateSceneImage returned:", imageResult);
       
+      const initialEntry: HistoryEntry = {
+        description: scene.description,
+        image: imageResult,
+      };
+
       const newGameState: GameState = {
         ...initialGameState,
         id: `save_${Date.now()}`,
         status: 'playing',
         chat,
+        history: [initialEntry],
         currentScene: scene,
         currentImage: imageResult,
         currentTheme: scene.theme,
@@ -263,14 +269,14 @@ const App: React.FC = () => {
       );
       console.log("generateSceneImage returned:", image);
 
-      const previousEntry: HistoryEntry = {
-        description: gameState.currentScene.description,
-        image: gameState.currentImage,
+      const newEntry: HistoryEntry = {
+        description: scene.description,
+        image: image,
       };
 
       const updatedState: GameState = {
         ...gameState,
-        history: [previousEntry, ...gameState.history],
+        history: [...gameState.history, newEntry],
         currentScene: scene,
         currentImage: image,
         currentTheme: scene.theme,
