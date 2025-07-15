@@ -109,9 +109,9 @@ const GeminiLLMProvider: LLMProvider = {
     console.log("[Gemini] Starting adventure with prompt:", startPrompt);
     const chat = createGeminiChat(config);
     const response = await chat.sendMessage({ message: startPrompt });
-    console.log("[Gemini] Raw response:", response.response.text());
+    console.log("[Gemini] Raw response:", response.text);
     try {
-      const scene: Scene = parseScene(response.response.text());
+      const scene: Scene = parseScene(response.text || '');
       return { chat, scene };
     } catch (err) {
       console.error("[Gemini] Failed to parse startAdventure response:", err);
@@ -128,9 +128,9 @@ Player Action: "${choice}"
 `;
     console.log("[Gemini] continueAdventure context:", context);
     const response = await chat.sendMessage({ message: context });
-    console.log("[Gemini] Raw response:", response.response.text());
+    console.log("[Gemini] Raw response:", response.text);
     try {
-      const scene: Scene = parseScene(response.response.text());
+      const scene: Scene = parseScene(response.text || '');
       return scene;
     } catch (err) {
       console.error("[Gemini] Failed to parse continueAdventure response:", err);
