@@ -44,6 +44,36 @@ const NotesViewerModal: React.FC<NotesViewerModalProps> = ({ isOpen, onClose, sa
                     )}
                 </div>
             </div>
+            <div>
+                <h3 className="font-semibold text-xl text-[var(--color-primary)] mb-2">Characters</h3>
+                <div className="bg-[var(--color-surface)] p-4 rounded-md">
+                    {saveData.npcs.length > 0 ? (
+                        <ul className="space-y-2 text-[var(--color-text)]">
+                            {saveData.npcs.map(npc => (
+                                <li key={npc.id}>
+                                    <strong className="font-medium">{npc.name}</strong> - {npc.description} (<em>{npc.status}</em>)
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="text-[var(--color-text-muted)]">You have not met any characters yet.</p>
+                    )}
+                </div>
+            </div>
+            <div>
+                <h3 className="font-semibold text-xl text-[var(--color-primary)] mb-2">History</h3>
+                <div className="bg-[var(--color-surface)] p-4 rounded-md">
+                    {saveData.history.length > 0 ? (
+                        <ul className="list-decimal list-inside space-y-1 text-[var(--color-text)]">
+                            {saveData.history.map((h, idx) => (
+                                <li key={idx}>{h.description.slice(0, 80)}...</li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="text-[var(--color-text-muted)]">No prior scenes recorded.</p>
+                    )}
+                </div>
+            </div>
         </div>
         <div className="p-4 border-t border-[var(--color-primary)]/20 text-right">
             <button onClick={onClose} className="bg-[var(--color-surface-accent)] text-[var(--color-text)] font-semibold py-2 px-4 rounded-lg hover:bg-[var(--color-primary)] transition-colors">

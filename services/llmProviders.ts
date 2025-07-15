@@ -33,6 +33,7 @@ You will generate a JSON object representing the current scene. This object must
 - "title": A short, evocative title for the scene.
 - "description": A detailed, multi-paragraph description of the environment, atmosphere, and any characters present. Use vivid language to engage the player's senses.
 - "choices": An array of 3-5 distinct actions the player can take. Each choice should be a string.
+- "imagePrompt": One short sentence describing exactly what the player sees from their point of view. Mention notable objects or characters in front of them. This will be used for image generation.
 - "theme": A single keyword suggesting a visual theme for the scene (e.g., "DARK_FOREST", "CYBERPUNK_CITY", "ANCIENT_RUINS").
 
 You must also manage the game's state:
@@ -45,11 +46,12 @@ Key rules:
 1.  Always respond with a valid JSON object matching the specified schema. Do not include any text outside of the JSON structure.
 2.  Ensure the story is coherent and evolves based on player actions.
 3.  Be creative and surprising. Introduce new characters, items, and plot twists.
-4.  The "description" should be at least two paragraphs long.
-5.  The "choices" should be meaningful and lead to different outcomes.
-6.  Update "worldState" and "npcs" logically based on the player's actions.
-7.  If the player's action is nonsensical or impossible, create a response that reflects that in a creative way.
-8.  The "theme" should be chosen from a consistent set of themes to allow for visual theming of the game.
+4.  Keep the "description" brief—no more than two short paragraphs totalling a few sentences.
+5.  Write the description from the second-person perspective, focusing on what the player sees.
+6.  The "choices" should be meaningful and lead to different outcomes.
+7.  Update "worldState" and "npcs" logically based on the player's actions.
+8.  If the player's action is nonsensical or impossible, create a response that reflects that in a creative way.
+9.  The "theme" should be chosen from a consistent set of themes to allow for visual theming of the game.
 `;
 
 const responseSchema = {
@@ -57,6 +59,7 @@ const responseSchema = {
   properties: {
     title: { type: "string" },
     description: { type: "string" },
+    imagePrompt: { type: "string" },
     choices: {
       type: "array",
       items: { type: "string" },
@@ -84,7 +87,7 @@ const responseSchema = {
       },
     },
   },
-  required: ["title", "description", "choices", "theme", "worldState", "npcs"],
+  required: ["title", "description", "imagePrompt", "choices", "theme", "worldState", "npcs"],
 };
 
 
