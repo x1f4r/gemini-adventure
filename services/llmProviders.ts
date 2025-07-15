@@ -1,5 +1,6 @@
 // LLM Provider interface and adapters for Gemini, LM Studio, and Ollama
 import type { Scene, NPC } from '../types';
+import { parseScene } from '../parseScene.js';
 import type { History } from "@google/genai/server";
 import { GoogleGenAI, type Chat } from "@google/genai";
 
@@ -102,10 +103,17 @@ const GeminiLLMProvider: LLMProvider = {
   name: 'Gemini',
   async startAdventure(config, startPrompt: string) {
     if (!config.apiKey) throw new Error("Gemini API key not found.");
+    console.log("[Gemini] Starting adventure with prompt:", startPrompt);
     const chat = createGeminiChat(config);
     const response = await chat.sendMessage(startPrompt);
-    const scene: Scene = JSON.parse(response.response.text().trim());
-    return { chat, scene };
+    console.log("[Gemini] Raw response:", response.response.text());
+    try {
+      const scene: Scene = parseScene(response.response.text());
+      return { chat, scene };
+    } catch (err) {
+      console.error("[Gemini] Failed to parse startAdventure response:", err);
+      throw err;
+    }
   },
   async continueAdventure(config, chat, choice, inventory, worldState, npcs) {
     const context = `
@@ -115,9 +123,16 @@ Known NPCs: ${JSON.stringify(npcs)}
 
 Player Action: "${choice}"
 `;
+    console.log("[Gemini] continueAdventure context:", context);
     const response = await chat.sendMessage(context);
-    const scene: Scene = JSON.parse(response.response.text().trim());
-    return scene;
+    console.log("[Gemini] Raw response:", response.response.text());
+    try {
+      const scene: Scene = parseScene(response.response.text());
+      return scene;
+    } catch (err) {
+      console.error("[Gemini] Failed to parse continueAdventure response:", err);
+      throw err;
+    }
   },
   async rehydrateAdventure(config, chatHistory) {
     if (!config.apiKey) throw new Error("Gemini API key not found.");
@@ -150,6 +165,7 @@ function createOpenAICompatibleProvider(name: 'LM Studio' | 'Ollama'): LLMProvid
         async startAdventure(config, startPrompt: string) {
             const endpoint = config.endpoint || (name === 'LM Studio' ? 'http://localhost:1234/v1/chat/completions' : 'http://localhost:11434/v1/chat/completions');
             const model = config.model || 'local-model';
+            console.log(`[${name}] Starting adventure with prompt:`, startPrompt);
             const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -167,13 +183,19 @@ function createOpenAICompatibleProvider(name: 'LM Studio' | 'Ollama'): LLMProvid
             }
             const data = await res.json();
             const text = data.choices?.[0]?.message?.content || '';
-            const scene: Scene = JSON.parse(text.trim());
-            const chatHistory = [
-                { role: 'system', content: systemInstruction },
-                { role: 'user', content: startPrompt },
-                { role: 'assistant', content: text }
-            ];
-            return { chat: chatHistory, scene };
+            console.log(`[${name}] Raw response:`, text);
+            try {
+                const scene: Scene = parseScene(text);
+                const chatHistory = [
+                    { role: 'system', content: systemInstruction },
+                    { role: 'user', content: startPrompt },
+                    { role: 'assistant', content: text }
+                ];
+                return { chat: chatHistory, scene };
+            } catch (err) {
+                console.error(`[${name}] Failed to parse startAdventure response:`, err);
+                throw err;
+            }
         },
         async continueAdventure(config, chat, choice, inventory, worldState, npcs) {
             const endpoint = config.endpoint || (name === 'LM Studio' ? 'http://localhost:1234/v1/chat/completions' : 'http://localhost:11434/v1/chat/completions');
@@ -186,6 +208,7 @@ Known NPCs: ${JSON.stringify(npcs)}
 Player Action: "${choice}"
 `;
             const messages = [...chat, { role: 'user', content: context }];
+            console.log(`[${name}] continueAdventure context:`, context);
             const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -200,10 +223,16 @@ Player Action: "${choice}"
             }
             const data = await res.json();
             const text = data.choices?.[0]?.message?.content || '';
-            const scene: Scene = JSON.parse(text.trim());
-            chat.push({ role: 'user', content: context });
-            chat.push({ role: 'assistant', content: text });
-            return scene;
+            console.log(`[${name}] Raw response:`, text);
+            try {
+                const scene: Scene = parseScene(text);
+                chat.push({ role: 'user', content: context });
+                chat.push({ role: 'assistant', content: text });
+                return scene;
+            } catch (err) {
+                console.error(`[${name}] Failed to parse continueAdventure response:`, err);
+                throw err;
+            }
         },
         async rehydrateAdventure(config, chatHistory) {
             return chatHistory;

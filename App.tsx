@@ -14,6 +14,7 @@ import NewAdventureModal from './components/NewAdventureModal';
 import InventoryPanel from './components/InventoryPanel';
 import CharacterPanel from './components/CharacterPanel';
 import TokenUsageIndicator from './components/TokenUsageIndicator';
+import LLMSettingsModal from './components/LLMSettingsModal';
 
 
 const themes: Record<ThemeName, Record<string, string>> = {
@@ -57,6 +58,7 @@ const App: React.FC = () => {
   const [isLoadModalOpen, setLoadModalOpen] = useState(false);
   const [isNotesModalOpen, setNotesModalOpen] = useState(false);
   const [isNewAdventureModalOpen, setNewAdventureModalOpen] = useState(false);
+  const [isLLMSettingsOpen, setLLMSettingsOpen] = useState(false);
   const [notesToView, setNotesToView] = useState<SaveData | null>(null);
   const [activeTab, setActiveTab] = useState<'history' | 'inventory' | 'characters'>('history');
   const [customActionInput, setCustomActionInput] = useState('');
@@ -232,6 +234,7 @@ const App: React.FC = () => {
     setCustomActionInput('');
     setGameState((prev: GameState) => ({ ...prev, isLoading: true }));
     try {
+      console.log("handleAction choice:", action);
       const scene = await llmProvider.continueAdventure(
         llmConfig,
         gameState.chat,
@@ -240,8 +243,10 @@ const App: React.FC = () => {
         gameState.worldState,
         gameState.npcs
       );
-      
+      console.log("continueAdventure returned:", scene);
+
       const image = await imageProvider.generateSceneImage(scene.description, scene.theme);
+      console.log("generateSceneImage returned:", image);
 
       const previousEntry: HistoryEntry = {
         description: gameState.currentScene.description,
@@ -259,6 +264,7 @@ const App: React.FC = () => {
         npcs: scene.npcs || gameState.npcs,
         isLoading: false,
       };
+      console.log("New state after action:", updatedState);
       
       setGameState(updatedState);
       await saveCurrentGame(updatedState);
@@ -308,8 +314,14 @@ const App: React.FC = () => {
                                 {availableImageProviders.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
                             </select>
                         </div>
-                        <div className="flex-grow">
+                        <div className="flex-grow flex items-center gap-2">
                             <TokenUsageIndicator tokenCount={tokenCount} />
+                            <button
+                              onClick={() => setLLMSettingsOpen(true)}
+                              className="text-sm bg-[var(--color-surface-accent)] text-[var(--color-text)] px-3 py-2 rounded-md hover:bg-[var(--color-primary)]"
+                            >
+                              LLM Settings
+                            </button>
                         </div>
                       </div>
                       <div className="w-56 flex-shrink-0">
@@ -398,8 +410,14 @@ const App: React.FC = () => {
         llmConfig={llmConfig}
         onLLMConfigChange={setLlmConfig}
         imageProviders={availableImageProviders}
-        defaultImageProvider={imageProvider}
+       defaultImageProvider={imageProvider}
        />
+      <LLMSettingsModal
+        isOpen={isLLMSettingsOpen}
+        onClose={() => setLLMSettingsOpen(false)}
+        llmConfig={llmConfig}
+        onLLMConfigChange={setLlmConfig}
+      />
     </main>
   );
 };
