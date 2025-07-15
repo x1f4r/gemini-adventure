@@ -1,7 +1,7 @@
 // LLM Provider interface and adapters for Gemini, LM Studio, and Ollama
 import type { Scene, NPC } from '../types';
 import { parseScene } from '../parseScene.js';
-import type { History } from "@google/genai/server";
+import type { Content } from "@google/genai";
 import { GoogleGenAI, type Chat } from "@google/genai";
 
 export type LLMProviderName = 'Gemini' | 'LM Studio' | 'Ollama';
@@ -83,19 +83,20 @@ const responseSchema = {
 };
 
 
-function createGeminiChat(config: LLMProviderConfig, history?: History[]): Chat {
-    const ai = new GoogleGenAI(config.apiKey || '');
-    return ai.getGenerativeModel({
+function createGeminiChat(config: LLMProviderConfig, history?: Content[]): Chat {
+    const ai = new GoogleGenAI({ apiKey: config.apiKey || '' });
+    return ai.chats.create({
         model: config.model || 'gemini-2.5-flash',
-        systemInstruction: {
-            role: 'system',
-            parts: [{ text: systemInstruction }],
-        },
-        generationConfig: {
+        history,
+        config: {
+            systemInstruction: {
+                role: 'system',
+                parts: [{ text: systemInstruction }],
+            },
             responseMimeType: 'application/json',
             responseSchema: responseSchema,
-        }
-    }).startChat({ history });
+        },
+    });
 }
 
 
@@ -141,8 +142,7 @@ Player Action: "${choice}"
   async countTokensForRequest(config, chat, action, inventory, worldState, npcs) {
     try {
         if (!config.apiKey) return 0;
-        const ai = new GoogleGenAI(config.apiKey);
-        const model = ai.getGenerativeModel({ model: config.model || 'gemini-2.5-flash' });
+        const ai = new GoogleGenAI({ apiKey: config.apiKey });
         const history = await chat.getHistory();
         const context = `
 Current Inventory: [${inventory.join(', ')}]
@@ -151,7 +151,10 @@ Known NPCs: ${JSON.stringify(npcs)}
 
 Player Action: "${action}"
 `;
-        const { totalTokens } = await model.countTokens([...history, { role: 'user', parts: [{ text: context }] }]);
+        const { totalTokens } = await ai.models.countTokens({
+            model: config.model || 'gemini-2.5-flash',
+            contents: [...history, { role: 'user', parts: [{ text: context }] }],
+        });
         return totalTokens;
     } catch {
       return 0;
