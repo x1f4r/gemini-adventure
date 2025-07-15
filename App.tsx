@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import type { GameState, Scene, HistoryEntry, ThemeName, SaveData, NPC, ImageProvider, LLMConfig } from './types';
 import { getLLMProvider, type LLMProviderName } from './services/llmProviders';
 import { ImagenProvider, createComfyUIImageProvider } from './services/imageProviders';
@@ -15,6 +15,7 @@ import InventoryPanel from './components/InventoryPanel';
 import CharacterPanel from './components/CharacterPanel';
 import TokenUsageIndicator from './components/TokenUsageIndicator';
 import LLMSettingsModal from './components/LLMSettingsModal';
+import ImageSettingsModal from './components/ImageSettingsModal';
 
 
 const themes: Record<ThemeName, Record<string, string>> = {
@@ -46,10 +47,7 @@ const initialGameState: GameState = {
     npcs: [],
 };
 
-const availableImageProviders = [
-  ImagenProvider,
-  createComfyUIImageProvider({ endpoint: 'http://localhost:8188/prompt' })
-];
+const defaultComfyEndpoint = 'http://localhost:8188/prompt';
 
 const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>(initialGameState);
@@ -63,13 +61,26 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'history' | 'inventory' | 'characters'>('history');
   const [customActionInput, setCustomActionInput] = useState('');
   const [tokenCount, setTokenCount] = useState(0);
+  const [isImageSettingsOpen, setImageSettingsOpen] = useState(false);
+  const [comfyUIEndpoint, setComfyUIEndpoint] = useState(defaultComfyEndpoint);
   
   const [llmConfig, setLlmConfig] = useState<LLMConfig>({
     provider: 'Gemini',
     apiKey: import.meta.env.VITE_GEMINI_API_KEY,
     model: 'gemini-2.5-pro',
   });
+  const availableImageProviders = useMemo(() => [
+    ImagenProvider,
+    createComfyUIImageProvider({ endpoint: comfyUIEndpoint })
+  ], [comfyUIEndpoint]);
+
   const [imageProvider, setImageProvider] = useState<ImageProvider>(availableImageProviders[0]);
+
+  useEffect(() => {
+    if (imageProvider.name === 'ComfyUI') {
+      setImageProvider(createComfyUIImageProvider({ endpoint: comfyUIEndpoint }));
+    }
+  }, [comfyUIEndpoint]);
 
   const llmProvider = getLLMProvider(llmConfig);
 
@@ -322,6 +333,12 @@ const App: React.FC = () => {
                             >
                               LLM Settings
                             </button>
+                            <button
+                              onClick={() => setImageSettingsOpen(true)}
+                              className="text-sm bg-[var(--color-surface-accent)] text-[var(--color-text)] px-3 py-2 rounded-md hover:bg-[var(--color-primary)]"
+                            >
+                              Image Settings
+                            </button>
                         </div>
                       </div>
                       <div className="w-56 flex-shrink-0">
@@ -417,6 +434,13 @@ const App: React.FC = () => {
         onClose={() => setLLMSettingsOpen(false)}
         llmConfig={llmConfig}
         onLLMConfigChange={setLlmConfig}
+      />
+      <ImageSettingsModal
+        isOpen={isImageSettingsOpen}
+        onClose={() => setImageSettingsOpen(false)}
+        providerName={imageProvider.name}
+        comfyUIEndpoint={comfyUIEndpoint}
+        setComfyUIEndpoint={setComfyUIEndpoint}
       />
     </main>
   );
