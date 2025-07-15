@@ -64,6 +64,11 @@ const responseSchema = {
     theme: { type: "string" },
     worldState: {
       type: "object",
+      // The API requires at least one named property for object schemas.
+      // "state" acts as a placeholder so dynamic keys are still accepted.
+      properties: {
+        state: { type: "string" },
+      },
       additionalProperties: { type: "string" },
     },
     npcs: {
