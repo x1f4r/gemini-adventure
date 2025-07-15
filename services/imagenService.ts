@@ -20,11 +20,11 @@ export async function generateSceneImage(prompt: string, theme: ThemeName, previ
   try {
     const style = themeStyles[theme] || themeStyles.FANTASY;
     const continuityPrompt = previousPrompt ? `Continuing from a scene described as '${previousPrompt}', the view now shows:` : '';
-    // Using 'imagen-3.0-generate-002' as the latest powerful model available.
+    // Using 'imagen-4' as the latest powerful model available.
     const fullPrompt = `first-person perspective, ${continuityPrompt} ${prompt}. The scene is viewed through the character's own eyes. No hands, arms, or any part of the player's body are visible. ${style}, cinematic, masterpiece, hyperrealistic`;
 
     const response = await ai.models.generateImages({
-      model: 'imagen-3.0-generate-002',
+      model: 'imagen-4',
       prompt: fullPrompt,
       config: {
         numberOfImages: 1,

@@ -13,10 +13,11 @@ export interface LLMProviderConfig {
 
 export interface LLMProvider {
   name: LLMProviderName;
-  startAdventure(startPrompt: string): Promise<{ chat: any; scene: Scene }>;
-  continueAdventure(chat: any, choice: string, inventory: string[], worldState: Record<string, string>, npcs: NPC[]): Promise<Scene>;
-  rehydrateAdventure?(chatHistory: any[]): Promise<any>;
+  startAdventure(config: LLMProviderConfig, startPrompt: string): Promise<{ chat: any; scene: Scene }>;
+  continueAdventure(config: LLMProviderConfig, chat: any, choice: string, inventory: string[], worldState: Record<string, string>, npcs: NPC[]): Promise<Scene>;
+  rehydrateAdventure?(config: LLMProviderConfig, chatHistory: any[]): Promise<any>;
   countTokensForRequest?(
+    config: LLMProviderConfig,
     chat: any,
     action: string,
     inventory: string[],
@@ -84,7 +85,7 @@ const responseSchema = {
 function createGeminiChat(config: LLMProviderConfig, history?: History[]): Chat {
     const ai = new GoogleGenAI(config.apiKey || '');
     return ai.getGenerativeModel({
-        model: config.model || 'gemini-1.5-flash',
+        model: config.model || 'gemini-2.5-flash',
         systemInstruction: {
             role: 'system',
             parts: [{ text: systemInstruction }],
@@ -126,7 +127,7 @@ Player Action: "${choice}"
     try {
         if (!config.apiKey) return 0;
         const ai = new GoogleGenAI(config.apiKey);
-        const model = ai.getGenerativeModel({ model: config.model || 'gemini-1.5-flash' });
+        const model = ai.getGenerativeModel({ model: config.model || 'gemini-2.5-flash' });
         const history = await chat.getHistory();
         const context = `
 Current Inventory: [${inventory.join(', ')}]

@@ -56,9 +56,9 @@ const LLMProviderSelector: React.FC<LLMProviderSelectorProps> = ({
           setAvailableModels([]);
         }
       } else {
-        setAvailableModels(['gemini-1.5-flash', 'gemini-1.5-pro']);
+        setAvailableModels(['gemini-2.5-flash', 'gemini-2.5-pro']);
         if (!selectedLLMConfig.model) {
-          onLLMConfigChange({ ...selectedLLMConfig, model: 'gemini-1.5-flash' });
+          onLLMConfigChange({ ...selectedLLMConfig, model: 'gemini-2.5-pro' });
         }
       }
     };

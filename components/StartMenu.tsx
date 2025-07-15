@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import LLMProviderSelector from './LLMProviderSelector';
-import { llmProviders, LLMProviderName } from '../services/llmProviders';
 
 interface StartMenuProps {
-    onNewGame: (provider: LLMProviderName) => void;
+    onNewGame: () => void;
     onLoadGame: () => void;
 }
 
@@ -35,7 +33,7 @@ const StartMenu: React.FC<StartMenuProps> = ({ onNewGame, onLoadGame }) => {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
-                      onClick={onNewGame}
+                      onClick={() => onNewGame()}
                       className="bg-[var(--color-primary)] text-white font-[var(--font-heading)] font-bold text-xl py-3 px-8 rounded-lg shadow-xl hover:bg-[var(--color-primary-hover)] focus:outline-none focus:ring-4 focus:ring-[var(--color-accent)] focus:ring-opacity-75 transform transition-all duration-300 hover:scale-105"
                     >
                       New Adventure
