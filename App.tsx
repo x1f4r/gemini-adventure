@@ -165,14 +165,20 @@ const App: React.FC = () => {
       const { chat, scene } = await llm.startAdventure(config, startPrompt);
       console.log("llm.startAdventure returned:", { chat, scene });
       console.log("Calling image.generateSceneImage...");
-      const imageResult = await image.generateSceneImage(scene.description, scene.theme);
+      const imageResult = await image.generateSceneImage(scene.imagePrompt || scene.description, scene.theme);
       console.log("image.generateSceneImage returned:", imageResult);
       
+      const initialEntry: HistoryEntry = {
+        description: scene.description,
+        image: imageResult,
+      };
+
       const newGameState: GameState = {
         ...initialGameState,
         id: `save_${Date.now()}`,
         status: 'playing',
         chat,
+        history: [initialEntry],
         currentScene: scene,
         currentImage: imageResult,
         currentTheme: scene.theme,
@@ -256,17 +262,21 @@ const App: React.FC = () => {
       );
       console.log("continueAdventure returned:", scene);
 
-      const image = await imageProvider.generateSceneImage(scene.description, scene.theme);
+      const image = await imageProvider.generateSceneImage(
+        scene.imagePrompt || scene.description,
+        scene.theme,
+        gameState.currentScene.imagePrompt || gameState.currentScene.description
+      );
       console.log("generateSceneImage returned:", image);
 
-      const previousEntry: HistoryEntry = {
-        description: gameState.currentScene.description,
-        image: gameState.currentImage,
+      const newEntry: HistoryEntry = {
+        description: scene.description,
+        image: image,
       };
 
       const updatedState: GameState = {
         ...gameState,
-        history: [previousEntry, ...gameState.history],
+        history: [...gameState.history, newEntry],
         currentScene: scene,
         currentImage: image,
         currentTheme: scene.theme,
