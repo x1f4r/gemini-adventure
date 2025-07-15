@@ -107,10 +107,10 @@ const GeminiLLMProvider: LLMProvider = {
     if (!config.apiKey) throw new Error("Gemini API key not found.");
     console.log("[Gemini] Starting adventure with prompt:", startPrompt);
     const chat = createGeminiChat(config);
-    const response = await chat.sendMessage(startPrompt);
-    console.log("[Gemini] Raw response:", response.response.text());
+    const response = await chat.sendMessage({ message: startPrompt });
+    console.log("[Gemini] Raw response:", response.text);
     try {
-      const scene: Scene = parseScene(response.response.text());
+      const scene: Scene = parseScene(response.text || '');
       return { chat, scene };
     } catch (err) {
       console.error("[Gemini] Failed to parse startAdventure response:", err);
@@ -126,10 +126,10 @@ Known NPCs: ${JSON.stringify(npcs)}
 Player Action: "${choice}"
 `;
     console.log("[Gemini] continueAdventure context:", context);
-    const response = await chat.sendMessage(context);
-    console.log("[Gemini] Raw response:", response.response.text());
+    const response = await chat.sendMessage({ message: context });
+    console.log("[Gemini] Raw response:", response.text);
     try {
-      const scene: Scene = parseScene(response.response.text());
+      const scene: Scene = parseScene(response.text || '');
       return scene;
     } catch (err) {
       console.error("[Gemini] Failed to parse continueAdventure response:", err);
@@ -156,7 +156,7 @@ Player Action: "${action}"
             model: config.model || 'gemini-2.5-flash',
             contents: [...history, { role: 'user', parts: [{ text: context }] }],
         });
-        return totalTokens;
+        return totalTokens ?? 0;
     } catch {
       return 0;
     }
