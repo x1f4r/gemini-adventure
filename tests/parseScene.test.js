@@ -16,3 +16,9 @@ test('parseScene handles code fences', () => {
 test('parseScene throws on invalid JSON', () => {
   assert.throws(() => parseScene('invalid'), SyntaxError);
 });
+
+test('parseScene handles surrounding text', () => {
+  const text = '<think> {"description":"test","choices":[],"theme":"FANTASY"} <end>';
+  const obj = parseScene(text);
+  assert.equal(obj.description, 'test');
+});
