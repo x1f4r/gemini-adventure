@@ -1,5 +1,5 @@
 // LLM Provider interface and adapters for Gemini, LM Studio, and Ollama
-import type { Scene, NPC } from '../types';
+import type { Scene, NPC, LLMConfig } from '../types';
 import { parseScene } from '../parseScene.js';
 import type { Content } from "@google/genai";
 import { GoogleGenAI, type Chat } from "@google/genai";
@@ -25,6 +25,7 @@ export interface LLMProvider {
     worldState: Record<string, string>,
     npcs: NPC[]
   ): Promise<number>;
+  getAvailableModels?(config: LLMProviderConfig): Promise<string[]>;
 }
 
 const systemInstruction = `You are a master storyteller for a text adventure game. Your goal is to create a rich, immersive, and interactive experience for the player.
@@ -116,7 +117,7 @@ const GeminiLLMProvider: LLMProvider = {
       throw err;
     }
   },
-  async continueAdventure(config, chat, choice, inventory, worldState, npcs) {
+  async continueAdventure(_config, chat, choice, inventory, worldState, npcs) {
     const context = `
 Current Inventory: [${inventory.join(', ')}]
 Current World State: ${JSON.stringify(worldState)}
@@ -237,7 +238,7 @@ Player Action: "${choice}"
                 throw err;
             }
         },
-        async rehydrateAdventure(config, chatHistory) {
+        async rehydrateAdventure(_config, chatHistory) {
             return chatHistory;
         },
         async countTokensForRequest() {
@@ -275,3 +276,4 @@ export function getLLMProvider(config: LLMConfig): LLMProvider {
             throw new Error(`Unknown LLM provider: ${config.provider}`);
     }
 }
+
