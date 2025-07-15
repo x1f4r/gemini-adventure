@@ -84,7 +84,7 @@ const responseSchema = {
 
 
 function createGeminiChat(config: LLMProviderConfig, history?: History[]): Chat {
-    const ai = new GoogleGenAI(config.apiKey || '');
+    const ai = new GoogleGenAI({ apiKey: config.apiKey || '' });
     return ai.getGenerativeModel({
         model: config.model || 'gemini-2.5-flash',
         systemInstruction: {
@@ -141,7 +141,7 @@ Player Action: "${choice}"
   async countTokensForRequest(config, chat, action, inventory, worldState, npcs) {
     try {
         if (!config.apiKey) return 0;
-        const ai = new GoogleGenAI(config.apiKey);
+        const ai = new GoogleGenAI({ apiKey: config.apiKey });
         const model = ai.getGenerativeModel({ model: config.model || 'gemini-2.5-flash' });
         const history = await chat.getHistory();
         const context = `
