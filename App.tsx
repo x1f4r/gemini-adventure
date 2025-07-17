@@ -353,7 +353,7 @@ const App: React.FC = () => {
                                 onChange={e => setLlmConfig({ ...llmConfig, provider: e.target.value as LLMProviderName })}
                                 className="bg-[var(--color-surface)] border border-[var(--color-surface)] rounded-md p-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                             >
-                                {['Gemini','LM Studio','Ollama'].map(name => <option key={name} value={name}>{name}</option>)}
+                                {['Gemini','LM Studio','Ollama', 'OpenAI', 'Grok', 'Groq'].map(name => <option key={name} value={name}>{name}</option>)}
                             </select>
                         </div>
                         <div className="flex items-center gap-2">
