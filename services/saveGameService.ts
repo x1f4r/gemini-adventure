@@ -1,4 +1,5 @@
 import type { SaveData } from '../types';
+import { compress, decompress } from './compressionService';
 
 const DB_NAME = 'GeminiAdventureDB';
 const DB_VERSION = 1;
@@ -26,10 +27,13 @@ function openDB(): Promise<IDBDatabase> {
  */
 export async function saveGame(saveData: SaveData): Promise<void> {
   const db = await openDB();
+  const compressedData = compress(saveData);
+  const dataToStore = { id: saveData.id, data: compressedData };
+
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
-    const request = store.put(saveData);
+    const request = store.put(dataToStore);
     
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => reject(transaction.error);
@@ -48,7 +52,9 @@ export async function getSavedGames(): Promise<SaveData[]> {
         const request = store.getAll();
 
         request.onsuccess = () => {
-            const sortedGames = (request.result as SaveData[]).sort((a, b) => new Date(b.lastPlayed).getTime() - new Date(a.lastPlayed).getTime());
+            const result = request.result as { id: string, data: string }[];
+            const decompressedGames = result.map(item => decompress(item.data) as SaveData);
+            const sortedGames = decompressedGames.sort((a, b) => new Date(b.lastPlayed).getTime() - new Date(a.lastPlayed).getTime());
             resolve(sortedGames);
         };
         request.onerror = () => reject(request.error);
@@ -67,7 +73,14 @@ export async function loadGame(id: string): Promise<SaveData | null> {
         const store = transaction.objectStore(STORE_NAME);
         const request = store.get(id);
 
-        request.onsuccess = () => resolve(request.result || null);
+        request.onsuccess = () => {
+            if (request.result) {
+                const decompressedData = decompress(request.result.data) as SaveData;
+                resolve(decompressedData);
+            } else {
+                resolve(null);
+            }
+        };
         request.onerror = () => reject(request.error);
     });
 }
