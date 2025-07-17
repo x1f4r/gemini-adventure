@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import type { GameState, Scene, HistoryEntry, ThemeName, SaveData, NPC, ImageProvider, LLMConfig } from './types';
+import type { GameState, Scene, HistoryEntry, ThemeName, SaveData, NPC, ImageProvider, LLMConfig, World } from './types';
 import { getLLMProvider, type LLMProviderName } from './services/llmProviders';
 import { ImagenProvider, createComfyUIImageProvider } from './services/imageProviders';
 import { getSavedGames, saveGame, deleteGame, loadGame } from './services/saveGameService';
@@ -45,6 +45,12 @@ const initialGameState: GameState = {
     inventory: [],
     worldState: {},
     npcs: [],
+    world: {
+        id: '',
+        name: '',
+        description: '',
+        locations: [],
+    },
 };
 
 const defaultComfyEndpoint = 'http://localhost:8188/prompt';
@@ -144,6 +150,7 @@ const App: React.FC = () => {
             currentScene: state.currentScene,
             currentImage: state.currentImage,
             llmConfig: llmConfig,
+            world: state.world,
         };
         await saveGame(saveData);
         const games = await getSavedGames();
@@ -186,6 +193,12 @@ const App: React.FC = () => {
         worldState: scene.worldState || {},
         npcs: scene.npcs || [],
         isLoading: false,
+        world: {
+            id: `world_${Date.now()}`,
+            name: 'New World',
+            description: 'A new world to explore.',
+            locations: [],
+        },
       };
       setGameState(newGameState);
       console.log("New game state set:", newGameState);
@@ -226,6 +239,7 @@ const App: React.FC = () => {
                 inventory: saveData.inventory,
                 worldState: saveData.worldState,
                 npcs: saveData.npcs,
+                world: saveData.world,
             });
         } else {
             throw new Error('Could not find the saved game file.');
