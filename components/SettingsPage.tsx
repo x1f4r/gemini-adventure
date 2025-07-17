@@ -1,4 +1,4 @@
-import React, 'react';
+import React from 'react';
 
 interface SettingsPageProps {
     initialGameState: any;
