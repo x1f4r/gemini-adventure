@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import type { GameState, Scene, HistoryEntry, ThemeName, SaveData, NPC, ImageProvider, LLMConfig } from './types';
+import type { GameState, Scene, HistoryEntry, ThemeName, SaveData, NPC, ImageProvider, LLMConfig, World } from './types';
 import { getLLMProvider, type LLMProviderName } from './services/llmProviders';
 import { ImagenProvider, createComfyUIImageProvider } from './services/imageProviders';
 import { getSavedGames, saveGame, deleteGame, loadGame } from './services/saveGameService';
@@ -16,6 +16,7 @@ import CharacterPanel from './components/CharacterPanel';
 import TokenUsageIndicator from './components/TokenUsageIndicator';
 import LLMSettingsModal from './components/LLMSettingsModal';
 import ImageSettingsModal from './components/ImageSettingsModal';
+import SettingsPage from './components/SettingsPage';
 
 
 const themes: Record<ThemeName, Record<string, string>> = {
@@ -45,6 +46,12 @@ const initialGameState: GameState = {
     inventory: [],
     worldState: {},
     npcs: [],
+    world: {
+        id: '',
+        name: '',
+        description: '',
+        locations: [],
+    },
 };
 
 const defaultComfyEndpoint = 'http://localhost:8188/prompt';
@@ -63,6 +70,7 @@ const App: React.FC = () => {
   const [tokenCount, setTokenCount] = useState(0);
   const [isImageSettingsOpen, setImageSettingsOpen] = useState(false);
   const [comfyUIEndpoint, setComfyUIEndpoint] = useState(defaultComfyEndpoint);
+  const [isSettingsPageOpen, setSettingsPageOpen] = useState(false);
   
   const [llmConfig, setLlmConfig] = useState<LLMConfig>({
     provider: 'Gemini',
@@ -144,6 +152,7 @@ const App: React.FC = () => {
             currentScene: state.currentScene,
             currentImage: state.currentImage,
             llmConfig: llmConfig,
+            world: state.world,
         };
         await saveGame(saveData);
         const games = await getSavedGames();
@@ -186,6 +195,12 @@ const App: React.FC = () => {
         worldState: scene.worldState || {},
         npcs: scene.npcs || [],
         isLoading: false,
+        world: {
+            id: `world_${Date.now()}`,
+            name: 'New World',
+            description: 'A new world to explore.',
+            locations: [],
+        },
       };
       setGameState(newGameState);
       console.log("New game state set:", newGameState);
@@ -226,6 +241,7 @@ const App: React.FC = () => {
                 inventory: saveData.inventory,
                 worldState: saveData.worldState,
                 npcs: saveData.npcs,
+                world: saveData.world,
             });
         } else {
             throw new Error('Could not find the saved game file.');
@@ -265,7 +281,9 @@ const App: React.FC = () => {
       const image = await imageProvider.generateSceneImage(
         scene.imagePrompt || scene.description,
         scene.theme,
-        gameState.currentScene.imagePrompt || gameState.currentScene.description
+        gameState.currentScene.imagePrompt || gameState.currentScene.description,
+        gameState.currentScene.title,
+        action
       );
       console.log("generateSceneImage returned:", image);
 
@@ -301,9 +319,23 @@ const App: React.FC = () => {
   }, [gameState, saveCurrentGame, llmProvider, imageProvider]);
 
   const renderContent = () => {
+    if (isSettingsPageOpen) {
+        return (
+            <SettingsPage
+                initialGameState={initialGameState}
+                systemInstruction={"You are a master storyteller for a text adventure game. Your goal is to create a rich, immersive, and interactive experience for the player."}
+                responseSchema={{}}
+                themeStyles={{}}
+                onInitialGameStateChange={(newInitialGameState) => console.log(newInitialGameState)}
+                onSystemInstructionChange={(newSystemInstruction) => console.log(newSystemInstruction)}
+                onResponseSchemaChange={(newResponseSchema) => console.log(newResponseSchema)}
+                onThemeStylesChange={(newThemeStyles) => console.log(newThemeStyles)}
+            />
+        );
+    }
     switch (gameState.status) {
         case 'menu':
-            return <StartMenu onNewGame={() => setNewAdventureModalOpen(true)} onLoadGame={() => setLoadModalOpen(true)} />;
+            return <StartMenu onNewGame={() => setNewAdventureModalOpen(true)} onLoadGame={() => setLoadModalOpen(true)} onSettings={() => setSettingsPageOpen(true)} />;
         case 'playing':
             return (
               <>
@@ -321,7 +353,7 @@ const App: React.FC = () => {
                                 onChange={e => setLlmConfig({ ...llmConfig, provider: e.target.value as LLMProviderName })}
                                 className="bg-[var(--color-surface)] border border-[var(--color-surface)] rounded-md p-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                             >
-                                {['Gemini','LM Studio','Ollama'].map(name => <option key={name} value={name}>{name}</option>)}
+                                {['Gemini','LM Studio','Ollama', 'OpenAI', 'Grok', 'Groq'].map(name => <option key={name} value={name}>{name}</option>)}
                             </select>
                         </div>
                         <div className="flex items-center gap-2">

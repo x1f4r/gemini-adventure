@@ -4,7 +4,7 @@ import { parseScene } from '../parseScene.js';
 import type { History } from "@google/genai/server";
 import { GoogleGenAI, type Chat } from "@google/genai";
 
-export type LLMProviderName = 'Gemini' | 'LM Studio' | 'Ollama';
+export type LLMProviderName = 'Gemini' | 'LM Studio' | 'Ollama' | 'OpenAI' | 'Grok' | 'Groq';
 
 export interface LLMProviderConfig {
   apiKey?: string;
@@ -25,6 +25,7 @@ export interface LLMProvider {
     worldState: Record<string, string>,
     npcs: NPC[]
   ): Promise<number>;
+  getAvailableModels?(config: LLMProviderConfig): Promise<string[]>;
 }
 
 const systemInstruction = `You are a master storyteller for a text adventure game. Your goal is to create a rich, immersive, and interactive experience for the player.
@@ -172,12 +173,12 @@ Player Action: "${action}"
   },
 };
 
-function createOpenAICompatibleProvider(name: 'LM Studio' | 'Ollama'): LLMProvider {
+function createOpenAICompatibleProvider(name: 'LM Studio' | 'Ollama' | 'OpenAI' | 'Grok' | 'Groq'): LLMProvider {
     return {
         name,
         async startAdventure(config, startPrompt: string) {
-            const endpoint = config.endpoint || (name === 'LM Studio' ? 'http://localhost:1234/v1/chat/completions' : 'http://localhost:11434/v1/chat/completions');
-            const model = config.model || 'local-model';
+            const endpoint = config.endpoint || (name === 'LM Studio' ? 'http://localhost:1234/v1/chat/completions' : name === 'Ollama' ? 'http://localhost:11434/v1/chat/completions' : name === 'OpenAI' ? 'https://api.openai.com/v1/chat/completions' : name === 'Grok' ? 'https://api.grok.ai/v1/chat/completions' : 'https://api.groq.com/openai/v1/chat/completions');
+            const model = config.model || (name === 'OpenAI' ? 'gpt-4' : 'local-model');
             console.log(`[${name}] Starting adventure with prompt:`, startPrompt);
             const res = await fetch(endpoint, {
                 method: 'POST',
@@ -211,8 +212,8 @@ function createOpenAICompatibleProvider(name: 'LM Studio' | 'Ollama'): LLMProvid
             }
         },
         async continueAdventure(config, chat, choice, inventory, worldState, npcs) {
-            const endpoint = config.endpoint || (name === 'LM Studio' ? 'http://localhost:1234/v1/chat/completions' : 'http://localhost:11434/v1/chat/completions');
-            const model = config.model || 'local-model';
+            const endpoint = config.endpoint || (name === 'LM Studio' ? 'http://localhost:1234/v1/chat/completions' : name === 'Ollama' ? 'http://localhost:11434/v1/chat/completions' : name === 'OpenAI' ? 'https://api.openai.com/v1/chat/completions' : name === 'Grok' ? 'https://api.grok.ai/v1/chat/completions' : 'https://api.groq.com/openai/v1/chat/completions');
+            const model = config.model || (name === 'OpenAI' ? 'gpt-4' : 'local-model');
             const context = `
 Current Inventory: [${inventory.join(', ')}]
 Current World State: ${JSON.stringify(worldState)}
@@ -255,9 +256,13 @@ Player Action: "${choice}"
             return 0;
         },
         async getAvailableModels(config) {
-            const endpoint = config.endpoint || (name === 'LM Studio' ? 'http://localhost:1234/v1/models' : 'http://localhost:11434/v1/models');
+            const endpoint = config.endpoint || (name === 'LM Studio' ? 'http://localhost:1234/v1/models' : name === 'Ollama' ? 'http://localhost:11434/v1/models' : name === 'OpenAI' ? 'https://api.openai.com/v1/models' : name === 'Grok' ? 'https://api.grok.ai/v1/models' : 'https://api.groq.com/openai/v1/models');
             try {
-                const res = await fetch(endpoint);
+                const res = await fetch(endpoint, {
+                    headers: {
+                        'Authorization': `Bearer ${config.apiKey}`
+                    }
+                });
                 if (!res.ok) {
                     console.error(`Failed to fetch models from ${name}: ${res.statusText}`);
                     return [];
@@ -281,6 +286,12 @@ export function getLLMProvider(config: LLMConfig): LLMProvider {
             return createOpenAICompatibleProvider('LM Studio');
         case 'Ollama':
             return createOpenAICompatibleProvider('Ollama');
+        case 'OpenAI':
+            return createOpenAICompatibleProvider('OpenAI');
+        case 'Grok':
+            return createOpenAICompatibleProvider('Grok');
+        case 'Groq':
+            return createOpenAICompatibleProvider('Groq');
         default:
             throw new Error(`Unknown LLM provider: ${config.provider}`);
     }

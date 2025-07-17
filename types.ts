@@ -59,6 +59,19 @@ export interface GameState {
   npcs: NPC[];
 }
 
+export interface Location {
+    id: string;
+    name: string;
+    description: string;
+}
+
+export interface World {
+    id: string;
+    name: string;
+    description: string;
+    locations: Location[];
+}
+
 export interface SaveData {
     id: string;
     lastPlayed: string;
@@ -71,6 +84,7 @@ export interface SaveData {
     currentScene: Scene | null;
     currentImage: string | null;
     llmConfig: LLMConfig;
+    world: World;
 }
 
 export interface ScenarioTemplate {

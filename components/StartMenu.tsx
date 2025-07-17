@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 interface StartMenuProps {
     onNewGame: () => void;
     onLoadGame: () => void;
+    onSettings: () => void;
 }
 
 const backgroundImages = [
@@ -13,7 +14,7 @@ const backgroundImages = [
     'https://images.unsplash.com/photo-1484291379182-23945a16314f?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
 ];
 
-const StartMenu: React.FC<StartMenuProps> = ({ onNewGame, onLoadGame }) => {
+const StartMenu: React.FC<StartMenuProps> = ({ onNewGame, onLoadGame, onSettings }) => {
     const [currentBgIndex, setCurrentBgIndex] = useState(0);
 
     useEffect(() => {
@@ -43,6 +44,12 @@ const StartMenu: React.FC<StartMenuProps> = ({ onNewGame, onLoadGame }) => {
                       className="bg-[var(--color-surface-accent)] text-[var(--color-text)] font-[var(--font-heading)] font-bold text-xl py-3 px-8 rounded-lg shadow-xl hover:bg-[var(--color-primary)] focus:outline-none focus:ring-4 focus:ring-[var(--color-accent)] focus:ring-opacity-75 transform transition-all duration-300 hover:scale-105"
                     >
                       Load Adventure
+                    </button>
+                    <button
+                        onClick={onSettings}
+                        className="bg-[var(--color-surface-accent)] text-[var(--color-text)] font-[var(--font-heading)] font-bold text-xl py-3 px-8 rounded-lg shadow-xl hover:bg-[var(--color-primary)] focus:outline-none focus:ring-4 focus:ring-[var(--color-accent)] focus:ring-opacity-75 transform transition-all duration-300 hover:scale-105"
+                    >
+                        Settings
                     </button>
                 </div>
            </div>
