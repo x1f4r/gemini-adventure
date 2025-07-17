@@ -281,7 +281,9 @@ const App: React.FC = () => {
       const image = await imageProvider.generateSceneImage(
         scene.imagePrompt || scene.description,
         scene.theme,
-        gameState.currentScene.imagePrompt || gameState.currentScene.description
+        gameState.currentScene.imagePrompt || gameState.currentScene.description,
+        gameState.currentScene.title,
+        action
       );
       console.log("generateSceneImage returned:", image);
 

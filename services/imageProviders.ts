@@ -9,7 +9,7 @@ export interface ImageProviderConfig {
 
 export interface ImageProvider {
   name: string;
-  generateSceneImage(prompt: string, theme: ThemeName, previousPrompt?: string): Promise<string>;
+  generateSceneImage(prompt: string, theme: ThemeName, previousPrompt?: string, location?: string, action?: string): Promise<string>;
 }
 
 const themeStyles: Record<ThemeName, string> = {
@@ -29,12 +29,15 @@ const themeStyles: Record<ThemeName, string> = {
 import { GoogleGenAI } from "@google/genai";
 export const ImagenProvider: ImageProvider = {
   name: 'Imagen',
-  async generateSceneImage(prompt, theme, previousPrompt) {
+  async generateSceneImage(prompt, theme, previousPrompt, location, action) {
     try {
       const ai = new GoogleGenAI({ apiKey: (typeof process !== 'undefined' ? process.env.API_KEY : undefined) });
       const style = themeStyles[theme] || themeStyles.FANTASY;
       const continuityPrompt = previousPrompt ? `Continuing from a scene described as '${previousPrompt}', the view now shows:` : '';
-      const fullPrompt = `first-person perspective, ${continuityPrompt} ${prompt}. The scene is viewed through the character's own eyes. No hands, arms, or any part of the player's body are visible. ${style}, cinematic, masterpiece, hyperrealistic`;
+      const locationPrompt = location ? `The scene takes place in ${location}.` : '';
+      const actionPrompt = action ? `The player is currently ${action}.` : '';
+      const handsPrompt = action && (action.includes("pick up") || action.includes("use") || action.includes("examine")) ? "The player's hands are visible, interacting with the object." : "No hands, arms, or any part of the player's body are visible.";
+      const fullPrompt = `first-person perspective, ${continuityPrompt} ${locationPrompt} ${prompt}. ${actionPrompt} The scene is viewed through the character's own eyes. ${handsPrompt} ${style}, cinematic, masterpiece, hyperrealistic`;
       const response = await ai.models.generateImages({
         model: 'imagen-4',
         prompt: fullPrompt,
@@ -60,11 +63,14 @@ export const ImagenProvider: ImageProvider = {
 export function createComfyUIImageProvider(config: ImageProviderConfig): ImageProvider {
   return {
     name: 'ComfyUI',
-    async generateSceneImage(prompt, theme, previousPrompt) {
+    async generateSceneImage(prompt, theme, previousPrompt, location, action) {
       try {
         const style = themeStyles[theme] || themeStyles.FANTASY;
         const continuityPrompt = previousPrompt ? `Continuing from a scene described as '${previousPrompt}', the view now shows:` : '';
-        const fullPrompt = `first-person perspective, ${continuityPrompt} ${prompt}. The scene is viewed through the character's own eyes. No hands, arms, or any part of the player's body are visible. ${style}, cinematic, masterpiece, hyperrealistic`;
+        const locationPrompt = location ? `The scene takes place in ${location}.` : '';
+        const actionPrompt = action ? `The player is currently ${action}.` : '';
+        const handsPrompt = action && (action.includes("pick up") || action.includes("use") || action.includes("examine")) ? "The player's hands are visible, interacting with the object." : "No hands, arms, or any part of the player's body are visible.";
+        const fullPrompt = `first-person perspective, ${continuityPrompt} ${locationPrompt} ${prompt}. ${actionPrompt} The scene is viewed through the character's own eyes. ${handsPrompt} ${style}, cinematic, masterpiece, hyperrealistic`;
         // ComfyUI expects a POST to /prompt with { prompt: string }
         const res = await fetch(config.endpoint || 'http://localhost:8188/prompt', {
           method: 'POST',

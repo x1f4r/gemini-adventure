@@ -16,12 +16,15 @@ const themeStyles: Record<ThemeName, string> = {
     PIRATE: 'pirate theme, tropical island, tall ships, skull and crossbones, treasure map, cinematic lighting',
 };
 
-export async function generateSceneImage(prompt: string, theme: ThemeName, previousPrompt?: string): Promise<string> {
+export async function generateSceneImage(prompt: string, theme: ThemeName, previousPrompt?: string, location?: string, action?: string): Promise<string> {
   try {
     const style = themeStyles[theme] || themeStyles.FANTASY;
     const continuityPrompt = previousPrompt ? `Continuing from a scene described as '${previousPrompt}', the view now shows:` : '';
+    const locationPrompt = location ? `The scene takes place in ${location}.` : '';
+    const actionPrompt = action ? `The player is currently ${action}.` : '';
+    const handsPrompt = action && (action.includes("pick up") || action.includes("use") || action.includes("examine")) ? "The player's hands are visible, interacting with the object." : "No hands, arms, or any part of the player's body are visible.";
     // Using 'imagen-4' as the latest powerful model available.
-    const fullPrompt = `first-person perspective, ${continuityPrompt} ${prompt}. The scene is viewed through the character's own eyes. No hands, arms, or any part of the player's body are visible. ${style}, cinematic, masterpiece, hyperrealistic`;
+    const fullPrompt = `first-person perspective, ${continuityPrompt} ${locationPrompt} ${prompt}. ${actionPrompt} The scene is viewed through the character's own eyes. ${handsPrompt} ${style}, cinematic, masterpiece, hyperrealistic`;
 
     const response = await ai.models.generateImages({
       model: 'imagen-4',
