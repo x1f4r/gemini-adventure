@@ -1,5 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
+  background-color: var(--color-background-start);
+  color: var(--color-text);
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-bold transition-colors;
+  }
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-hover;
+  }
+  .btn-secondary {
+    @apply bg-surface text-text hover:bg-surface-accent;
+  }
 }
