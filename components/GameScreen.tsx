@@ -47,11 +47,11 @@ const GameScreen: React.FC<GameScreenProps> = ({
       </div>
       
       <div className="p-6 md:p-8 flex flex-col justify-between flex-grow overflow-y-auto">
-        <div className="text-[var(--color-text)] font-[var(--font-body)] text-lg leading-relaxed mb-6 max-w-4xl mx-auto">
+        <div className="text-[var(--color-text)] font-[var(--font-body)] text-lg leading-relaxed mb-6 max-w-4xl mx-auto w-full">
           <p>{scene?.description}</p>
         </div>
         
-        <div className="mt-auto pt-4">
+        <div className="mt-auto pt-4 max-w-4xl mx-auto w-full">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 {scene?.choices.map((choice, index) => (
                 <button

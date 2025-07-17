@@ -49,6 +49,19 @@ const initialGameState: GameState = {
 
 const defaultComfyEndpoint = 'http://localhost:8188/prompt';
 
+const GlobalStyle = () => (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Almendra+SC&family=Architects+Daughter&family=Cinzel:wght@400;700&family=Inter:wght@400;700&family=Pirata+One&family=Playfair+Display:wght@400;700&family=Rajdhani:wght@400;700&family=Rye&family=Special+Elite&display=swap');
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  `}</style>
+);
+
 const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>(initialGameState);
   const [manualTheme, setManualTheme] = useState<ThemeName | 'AUTOMATIC'>('AUTOMATIC');
@@ -309,60 +322,58 @@ const App: React.FC = () => {
               <>
                   <header className="flex-shrink-0 bg-[var(--color-background-start)]/80 backdrop-blur-sm border-b border-[var(--color-primary)]/20 p-3 shadow-lg z-10">
                     <div className="mx-auto flex justify-between items-center max-w-screen-2xl px-4 gap-4">
-                      <h1 className="font-[var(--font-heading)] text-xl lg:text-2xl font-bold text-[var(--color-accent)] whitespace-nowrap flex-shrink-0" onClick={() => setGameState(initialGameState)} style={{cursor: 'pointer'}}>
-                        Gemini Adventure
-                      </h1>
-                      <div className="flex-grow min-w-0 px-4 lg:px-8 flex items-center justify-center gap-4">
-                        <div className="flex items-center gap-2">
-                            <label htmlFor="llm-provider-main" className="text-sm font-semibold text-[var(--color-text-muted)]">LLM:</label>
-                            <select
-                                id="llm-provider-main"
-                                value={llmConfig.provider}
-                                onChange={e => setLlmConfig({ ...llmConfig, provider: e.target.value as LLMProviderName })}
-                                className="bg-[var(--color-surface)] border border-[var(--color-surface)] rounded-md p-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
-                            >
-                                {['Gemini','LM Studio','Ollama'].map(name => <option key={name} value={name}>{name}</option>)}
-                            </select>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <label htmlFor="image-provider-main" className="text-sm font-semibold text-[var(--color-text-muted)]">Images:</label>
-                            <select
-                                id="image-provider-main"
-                                value={imageProvider.name}
-                                onChange={e => setImageProvider(availableImageProviders.find(p => p.name === e.target.value)!)}
-                                className="bg-[var(--color-surface)] border border-[var(--color-surface)] rounded-md p-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
-                            >
-                                {availableImageProviders.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
-                            </select>
-                        </div>
-                        <div className="flex-grow flex items-center gap-2">
+                        <h1 className="font-[var(--font-heading)] text-xl lg:text-2xl font-bold text-[var(--color-accent)] whitespace-nowrap flex-shrink-0" onClick={() => setGameState(initialGameState)} style={{cursor: 'pointer'}}>
+                            Gemini Adventure
+                        </h1>
+                        <div className="flex-grow min-w-0 px-4 lg:px-8 flex items-center justify-end gap-4">
+                            <div className="flex items-center gap-2">
+                                <label htmlFor="llm-provider-main" className="text-sm font-semibold text-[var(--color-text-muted)]">LLM:</label>
+                                <select
+                                    id="llm-provider-main"
+                                    value={llmConfig.provider}
+                                    onChange={e => setLlmConfig({ ...llmConfig, provider: e.target.value as LLMProviderName })}
+                                    className="bg-[var(--color-surface)] border border-[var(--color-surface)] rounded-md p-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                                >
+                                    {['Gemini','LM Studio','Ollama'].map(name => <option key={name} value={name}>{name}</option>)}
+                                </select>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <label htmlFor="image-provider-main" className="text-sm font-semibold text-[var(--color-text-muted)]">Images:</label>
+                                <select
+                                    id="image-provider-main"
+                                    value={imageProvider.name}
+                                    onChange={e => setImageProvider(availableImageProviders.find(p => p.name === e.target.value)!)}
+                                    className="bg-[var(--color-surface)] border border-[var(--color-surface)] rounded-md p-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                                >
+                                    {availableImageProviders.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                                </select>
+                            </div>
                             <TokenUsageIndicator tokenCount={tokenCount} />
                             <button
-                              onClick={() => setLLMSettingsOpen(true)}
-                              className="text-sm bg-[var(--color-surface-accent)] text-[var(--color-text)] px-3 py-2 rounded-md hover:bg-[var(--color-primary)]"
+                                onClick={() => setLLMSettingsOpen(true)}
+                                className="text-sm bg-[var(--color-surface-accent)] text-[var(--color-text)] px-3 py-2 rounded-md hover:bg-[var(--color-primary)]"
                             >
-                              LLM Settings
+                                LLM Settings
                             </button>
                             <button
-                              onClick={() => setImageSettingsOpen(true)}
-                              className="text-sm bg-[var(--color-surface-accent)] text-[var(--color-text)] px-3 py-2 rounded-md hover:bg-[var(--color-primary)]"
+                                onClick={() => setImageSettingsOpen(true)}
+                                className="text-sm bg-[var(--color-surface-accent)] text-[var(--color-text)] px-3 py-2 rounded-md hover:bg-[var(--color-primary)]"
                             >
-                              Image Settings
+                                Image Settings
                             </button>
+                            <div className="w-56 flex-shrink-0">
+                                <ThemeSelector
+                                    availableThemes={availableThemeNames}
+                                    selectedTheme={manualTheme}
+                                    onThemeChange={setManualTheme}
+                                    disabled={gameState.status !== 'playing'}
+                                />
+                            </div>
                         </div>
-                      </div>
-                      <div className="w-56 flex-shrink-0">
-                        <ThemeSelector
-                          availableThemes={availableThemeNames}
-                          selectedTheme={manualTheme}
-                          onThemeChange={setManualTheme}
-                          disabled={gameState.status !== 'playing'}
-                        />
-                      </div>
                     </div>
                   </header>
                   <div className="flex-grow flex flex-col lg:flex-row overflow-hidden">
-                      <div className="flex-grow p-4 lg:p-6 h-full flex flex-col">
+                      <div className="flex-grow p-4 lg:p-6 h-full flex flex-col lg:w-2/3">
                           <GameScreen
                               scene={gameState.currentScene}
                               image={gameState.currentImage}
@@ -372,7 +383,7 @@ const App: React.FC = () => {
                               onCustomActionInputChange={setCustomActionInput}
                           />
                       </div>
-                      <aside className="w-full lg:w-80 xl:w-96 flex-shrink-0 bg-[var(--color-background-start)] p-6 flex flex-col gap-4">
+                      <aside className="w-full lg:w-1/3 flex-shrink-0 bg-[var(--color-background-start)] p-6 flex flex-col gap-4">
                         <div className="flex-shrink-0 border-b-2 border-[var(--color-primary)]/30">
                             <nav className="flex -mb-px">
                                 <button onClick={() => setActiveTab('history')} className={`w-1/3 py-3 px-1 text-center border-b-2 font-semibold text-sm transition-colors duration-200 ${activeTab === 'history' ? 'border-[var(--color-accent)] text-[var(--color-accent)]' : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-gray-500'}`}>
@@ -416,6 +427,7 @@ const App: React.FC = () => {
 
   return (
     <main className="bg-[var(--color-background-start)] h-screen w-full flex flex-col overflow-hidden">
+      <GlobalStyle />
       {renderContent()}
       <LoadGameModal 
         isOpen={isLoadModalOpen}
