@@ -16,6 +16,7 @@ import CharacterPanel from './components/CharacterPanel';
 import TokenUsageIndicator from './components/TokenUsageIndicator';
 import LLMSettingsModal from './components/LLMSettingsModal';
 import ImageSettingsModal from './components/ImageSettingsModal';
+import SettingsPage from './components/SettingsPage';
 
 
 const themes: Record<ThemeName, Record<string, string>> = {
@@ -69,6 +70,7 @@ const App: React.FC = () => {
   const [tokenCount, setTokenCount] = useState(0);
   const [isImageSettingsOpen, setImageSettingsOpen] = useState(false);
   const [comfyUIEndpoint, setComfyUIEndpoint] = useState(defaultComfyEndpoint);
+  const [isSettingsPageOpen, setSettingsPageOpen] = useState(false);
   
   const [llmConfig, setLlmConfig] = useState<LLMConfig>({
     provider: 'Gemini',
@@ -315,9 +317,23 @@ const App: React.FC = () => {
   }, [gameState, saveCurrentGame, llmProvider, imageProvider]);
 
   const renderContent = () => {
+    if (isSettingsPageOpen) {
+        return (
+            <SettingsPage
+                initialGameState={initialGameState}
+                systemInstruction={"You are a master storyteller for a text adventure game. Your goal is to create a rich, immersive, and interactive experience for the player."}
+                responseSchema={{}}
+                themeStyles={{}}
+                onInitialGameStateChange={(newInitialGameState) => console.log(newInitialGameState)}
+                onSystemInstructionChange={(newSystemInstruction) => console.log(newSystemInstruction)}
+                onResponseSchemaChange={(newResponseSchema) => console.log(newResponseSchema)}
+                onThemeStylesChange={(newThemeStyles) => console.log(newThemeStyles)}
+            />
+        );
+    }
     switch (gameState.status) {
         case 'menu':
-            return <StartMenu onNewGame={() => setNewAdventureModalOpen(true)} onLoadGame={() => setLoadModalOpen(true)} />;
+            return <StartMenu onNewGame={() => setNewAdventureModalOpen(true)} onLoadGame={() => setLoadModalOpen(true)} onSettings={() => setSettingsPageOpen(true)} />;
         case 'playing':
             return (
               <>
