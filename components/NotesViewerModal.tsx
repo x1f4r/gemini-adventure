@@ -12,7 +12,7 @@ const NotesViewerModal: React.FC<NotesViewerModalProps> = ({ isOpen, onClose, sa
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-[var(--color-background-end)] rounded-lg shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+      <div className="bg-[var(--color-background-end)] rounded-lg shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col animate-modal-fade-in" onClick={e => e.stopPropagation()}>
         <div className="p-6 border-b border-[var(--color-primary)]/20">
           <h2 className="font-[var(--font-heading)] text-3xl font-bold text-[var(--color-accent)]">Internal Notes</h2>
           <p className="text-[var(--color-text-muted)]">This is the context the AI uses to shape your story.</p>

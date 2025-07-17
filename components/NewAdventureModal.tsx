@@ -1,12 +1,24 @@
 import React, { useState } from 'react';
 import { scenarios } from '../data/scenarios';
-import type { ScenarioTemplate, ImageProvider, LLMConfig } from '../types';
+import type { ScenarioTemplate, ImageProvider, LLMConfig, ThemeName } from '../types';
 import LLMProviderSelector from './LLMProviderSelector';
+
+function getThemeFromScenario(scenario: ScenarioTemplate): ThemeName | null {
+    const idParts = scenario.id.split('_');
+    if (idParts.length > 0) {
+        const potentialTheme = idParts[0].toUpperCase();
+        const validThemes: string[] = ['FANTASY', 'CYBERPUNK', 'SCI_FI', 'HORROR', 'NOIR', 'STEAMPUNK', 'SOLARPUNK', 'POST_APOCALYPTIC', 'WESTERN', 'PIRATE'];
+        if (validThemes.includes(potentialTheme)) {
+            return potentialTheme as ThemeName;
+        }
+    }
+    return null;
+}
 
 interface NewAdventureModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onStart: (prompt: string, llmConfig: LLMConfig, imageProvider: ImageProvider) => void;
+  onStart: (prompt: string, llmConfig: LLMConfig, imageProvider: ImageProvider, theme?: ThemeName) => void;
   selectedLLMConfig: LLMConfig;
   onLLMConfigChange: (config: LLMConfig) => void;
   imageProviders: ImageProvider[];
@@ -32,7 +44,8 @@ const NewAdventureModal: React.FC<NewAdventureModalProps> = ({
 
   const handleStart = () => {
     if (activeTab === 'select' && selectedScenario) {
-      onStart(selectedScenario.prompt, selectedLLMConfig, selectedImage);
+      const theme = getThemeFromScenario(selectedScenario);
+      onStart(selectedScenario.prompt, selectedLLMConfig, selectedImage, theme ?? undefined);
     } else if (activeTab === 'custom' && customPrompt.trim()) {
       onStart(customPrompt.trim(), selectedLLMConfig, selectedImage);
     }
@@ -43,7 +56,7 @@ const NewAdventureModal: React.FC<NewAdventureModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div 
-        className="bg-[var(--color-background-end)] rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col" 
+        className="bg-[var(--color-background-end)] rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-modal-fade-in"
         onClick={e => e.stopPropagation()}
       >
         <div className="p-6 border-b border-[var(--color-primary)]/20">

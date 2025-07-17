@@ -59,6 +59,20 @@ const GlobalStyle = () => (
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes modal-fade-in {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-modal-fade-in {
+      animation: modal-fade-in 0.3s ease-out;
+    }
   `}</style>
 );
 
@@ -166,12 +180,15 @@ const App: React.FC = () => {
     }
   }, [llmProvider, llmConfig]);
 
-  const handleNewGame = useCallback(async (startPrompt: string, config: LLMConfig, image: ImageProvider) => {
+  const handleNewGame = useCallback(async (startPrompt: string, config: LLMConfig, image: ImageProvider, theme?: ThemeName) => {
     setNewAdventureModalOpen(false);
+    if (theme) {
+        setManualTheme(theme);
+    }
     setLlmConfig(config);
     setImageProvider(image);
     const llm = getLLMProvider(config);
-    setGameState((prev: GameState) => ({ ...initialGameState, isLoading: true, status: 'playing' }));
+    setGameState((prev: GameState) => ({ ...initialGameState, isLoading: true, status: 'playing', currentTheme: theme || prev.currentTheme }));
     console.log("handleNewGame called with:", { startPrompt, llmConfig: config, imageName: image.name });
     try {
       console.log("Calling llm.startAdventure...");
@@ -319,7 +336,7 @@ const App: React.FC = () => {
             return <StartMenu onNewGame={() => setNewAdventureModalOpen(true)} onLoadGame={() => setLoadModalOpen(true)} />;
         case 'playing':
             return (
-              <>
+              <div className="flex flex-col h-full animate-fade-in">
                   <header className="flex-shrink-0 bg-[var(--color-background-start)]/80 backdrop-blur-sm border-b border-[var(--color-primary)]/20 p-3 shadow-lg z-10">
                     <div className="mx-auto flex justify-between items-center max-w-screen-2xl px-4 gap-4">
                         <h1 className="font-[var(--font-heading)] text-xl lg:text-2xl font-bold text-[var(--color-accent)] whitespace-nowrap flex-shrink-0" onClick={() => setGameState(initialGameState)} style={{cursor: 'pointer'}}>
@@ -405,7 +422,7 @@ const App: React.FC = () => {
                         </div>
                       </aside>
                   </div>
-              </>
+              </div>
             );
         case 'error':
              return (
@@ -426,7 +443,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <main className="bg-[var(--color-background-start)] h-screen w-full flex flex-col overflow-hidden">
+    <main className="bg-gradient-to-br from-[var(--color-background-start)] to-[var(--color-background-end)] h-screen w-full flex flex-col overflow-hidden">
       <GlobalStyle />
       {renderContent()}
       <LoadGameModal 
