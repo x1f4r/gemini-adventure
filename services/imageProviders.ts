@@ -31,7 +31,7 @@ export const ImagenProvider: ImageProvider = {
   name: 'Imagen',
   async generateSceneImage(prompt, theme, previousPrompt, location, action) {
     try {
-      const ai = new GoogleGenAI({ apiKey: (typeof process !== 'undefined' ? process.env.API_KEY : undefined) });
+      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
       const style = themeStyles[theme] || themeStyles.FANTASY;
       const continuityPrompt = previousPrompt ? `Continuing from a scene described as '${previousPrompt}', the view now shows:` : '';
       const locationPrompt = location ? `The scene takes place in ${location}.` : '';
