@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import type { ThemeName } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
 const themeStyles: Record<ThemeName, string> = {
     FANTASY: 'dark fantasy art, epic, cinematic lighting, hyperdetailed, intricately detailed',
